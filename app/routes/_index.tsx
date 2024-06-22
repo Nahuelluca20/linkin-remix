@@ -1,4 +1,4 @@
-import type { MetaFunction } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 
 export const meta: MetaFunction = () => {
   return [
@@ -8,6 +8,12 @@ export const meta: MetaFunction = () => {
       content: "Welcome to Remix on Cloudflare!",
     },
   ];
+};
+
+export const loader = async ({ context }: LoaderFunctionArgs) => {
+  const { DB } = context.cloudflare.env;
+  console.log(DB);
+  return null;
 };
 
 export default function Index() {
