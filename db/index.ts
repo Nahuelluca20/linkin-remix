@@ -1,9 +1,9 @@
 import { Kysely } from "kysely";
 import { D1Dialect } from "kysely-d1";
-// import { GlossaryCategory } from "./tables-interfaces/glossary-category";
+import { IntagramAccount } from "./tables-interfaces/instagram_account";
 
 interface Database {
-  // glossary_category: GlossaryCategory;
+  instagram_account: IntagramAccount;
 }
 
 export const db = (DB: D1Database) => {
