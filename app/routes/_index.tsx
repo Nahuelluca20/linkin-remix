@@ -10,11 +10,10 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const { DB } = context.cloudflare.env;
-  console.log(DB);
-  return null;
-};
+// export const loader = async ({ context }: LoaderFunctionArgs) => {
+//   const { DB } = context.cloudflare.env;
+//   return null;
+// };
 
 export default function Index() {
   return (

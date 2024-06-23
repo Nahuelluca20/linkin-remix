@@ -1,9 +1,10 @@
 // app/routes/auth.google.tsx
 import { ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
-import { authenticator } from "~/routes/auth.server";
+import { Auth } from "~/modules/auth.server";
 
 export const loader = () => redirect("/login");
 
-export const action = ({ request }: ActionFunctionArgs) => {
-  return authenticator.authenticate("google", request);
+export const action = async ({ request, context }: ActionFunctionArgs) => {
+  const auth = new Auth(context);
+  return await auth.authenticate("google", request);
 };
