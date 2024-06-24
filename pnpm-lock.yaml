@@ -26,6 +26,9 @@ dependencies:
   kysely-d1:
     specifier: ^0.3.0
     version: 0.3.0(kysely@0.27.3)
+  lucide-react:
+    specifier: ^0.396.0
+    version: 0.396.0(react@18.3.1)
   react:
     specifier: ^18.2.0
     version: 18.3.1
@@ -41,6 +44,9 @@ dependencies:
   remix-auth-google:
     specifier: ^2.0.0
     version: 2.0.0(@remix-run/server-runtime@2.9.2)(remix-auth@3.7.0)
+  remix-themes:
+    specifier: ^1.3.1
+    version: 1.3.1(@remix-run/react@2.9.2)(@remix-run/server-runtime@2.9.2)
   remix-utils:
     specifier: ^7.6.0
     version: 7.6.0(@remix-run/cloudflare@2.9.2)(@remix-run/react@2.9.2)(react@18.3.1)(zod@3.23.8)
@@ -6515,6 +6521,14 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
+  /lucide-react@0.396.0(react@18.3.1):
+    resolution: {integrity: sha512-N/zP+9vEfEYHiMWMpjwH/M5diaV0e4UFe07BpgdzaRYce5QvXi87hixf7F0Xqdr3zuX/9u7H/2D4MVXIK22O0A==}
+    peerDependencies:
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.3.1
+    dev: false
+
   /magic-string@0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
     dependencies:
@@ -8074,6 +8088,16 @@ packages:
       '@remix-run/react': 2.9.2(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)
       '@remix-run/server-runtime': 2.9.2(typescript@5.5.2)
       uuid: 8.3.2
+    dev: false
+
+  /remix-themes@1.3.1(@remix-run/react@2.9.2)(@remix-run/server-runtime@2.9.2):
+    resolution: {integrity: sha512-RNw2nMG7c8Ei6KLjr5dUwy++4ga3KFSmedzqPk+de+f3JZhPbfH+HaEWSu2nPpuIMBlNldrUoCt4GN7rC5u5uw==}
+    peerDependencies:
+      '@remix-run/react': '>= 1'
+      '@remix-run/server-runtime': '>= 1'
+    dependencies:
+      '@remix-run/react': 2.9.2(react-dom@18.3.1)(react@18.3.1)(typescript@5.5.2)
+      '@remix-run/server-runtime': 2.9.2(typescript@5.5.2)
     dev: false
 
   /remix-utils@7.6.0(@remix-run/cloudflare@2.9.2)(@remix-run/react@2.9.2)(react@18.3.1)(zod@3.23.8):
