@@ -41,6 +41,7 @@ export class Auth {
           callbackURL: "http://localhost:5173/auth/google/callback",
         },
         async ({ profile }) => {
+          console.log(profile);
           const { DB } = context.cloudflare.env;
           const findUser = await db(DB)
             .selectFrom("users")
@@ -54,14 +55,16 @@ export class Auth {
             .values({
               email: profile.emails[0].value,
               name: profile.name.givenName,
+              profile_image: profile.photos[0].value,
             })
-            .returning(["id", "email", "name"])
+            .returning(["id", "email", "name", "profile_image"])
             .executeTakeFirstOrThrow();
           if (createUser) return createUser;
 
           return {
             name: profile.name.givenName,
             email: profile.emails[0].value,
+            profile_image: profile.photos[0].value,
           };
         }
       )

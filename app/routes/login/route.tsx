@@ -4,7 +4,6 @@ import { SessionStorage } from "~/modules/session.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const user = await SessionStorage.readUser(context, request);
-  console.log(user);
   if (!user) return json(null);
 
   throw redirect("/");

@@ -8,6 +8,8 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
 
     const user = await auth.authenticate("google", request);
 
+    if (!user) throw redirect("/login");
+
     const sessionStorage = new SessionStorage(context);
 
     const session = await sessionStorage.read(request.headers.get("cookie"));
