@@ -4,57 +4,68 @@ import { createCookieSessionStorage } from "@remix-run/cloudflare";
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
 
-import { IUser } from "db/tables-interfaces/user";
 import { db } from "db";
+import { User } from "./session.server";
 
 export class Auth {
-  protected authenticator: Authenticator<IUser>;
+  protected authenticator: Authenticator<User>;
   protected sessionStorage: SessionStorage;
 
-  public authenticate: Authenticator<IUser>["authenticate"];
+  public authenticate: Authenticator<User>["authenticate"];
 
   constructor(context: AppLoadContext) {
     this.sessionStorage = createCookieSessionStorage({
       cookie: {
-        name: "_session",
+        name: "linkin:auth",
         sameSite: "lax",
         path: "/",
+        maxAge: 60 * 60 * 24 * 365,
         httpOnly: true,
-        secrets: ["s3cr3t"],
+        secure: process.env.NODE_ENV === "production",
+        secrets: [process.env.COOKIE_SESSION_SECRET!],
       },
     });
 
-    this.authenticator = new Authenticator<IUser>(this.sessionStorage);
+    this.authenticator = new Authenticator<User>(this.sessionStorage, {
+      throwOnError: true,
+      sessionKey: "token",
+    });
 
-    const googleStrategy = new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: "http://localhost:5173/auth/google/callback",
-      },
-      async ({ accessToken, refreshToken, extraParams, profile }) => {
-        const { DB } = context.cloudflare.env;
-        const findUser = await db(DB)
-          .selectFrom("users")
-          .selectAll()
-          .where("email", "=", `${profile.emails[0].value}`)
-          .executeTakeFirst();
-        console.log(findUser);
-        if (findUser) return findUser;
+    this.authenticator = new Authenticator<User>(this.sessionStorage);
 
-        const createUser = await db(DB)
-          .insertInto("users")
-          .values({
-            email: profile.emails[0].value,
+    this.authenticator.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          callbackURL: "http://localhost:5173/auth/google/callback",
+        },
+        async ({ profile }) => {
+          const { DB } = context.cloudflare.env;
+          const findUser = await db(DB)
+            .selectFrom("users")
+            .selectAll()
+            .where("email", "=", `${profile.emails[0].value}`)
+            .executeTakeFirst();
+          if (findUser) return findUser;
+
+          const createUser = await db(DB)
+            .insertInto("users")
+            .values({
+              email: profile.emails[0].value,
+              name: profile.name.givenName,
+            })
+            .returning(["id", "email", "name"])
+            .executeTakeFirstOrThrow();
+          if (createUser) return createUser;
+
+          return {
             name: profile.name.givenName,
-          })
-          .returning(["id", "email", "name"])
-          .executeTakeFirstOrThrow();
-        if (createUser) return createUser;
-      }
+            email: profile.emails[0].value,
+          };
+        }
+      )
     );
-
-    this.authenticator.use(googleStrategy);
 
     this.authenticate = this.authenticator.authenticate.bind(
       this.authenticator
