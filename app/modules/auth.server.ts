@@ -3,7 +3,6 @@ import type { AppLoadContext, SessionStorage } from "@remix-run/cloudflare";
 import { createCookieSessionStorage } from "@remix-run/cloudflare";
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
-import { env } from "node:process";
 import { db } from "db";
 import { User } from "./session.server";
 
@@ -14,6 +13,12 @@ export class Auth {
   public authenticate: Authenticator<User>["authenticate"];
 
   constructor(context: AppLoadContext) {
+    const {
+      COOKIE_SESSION_SECRET,
+      ENVIROMENT,
+      GOOGLE_CLIENT_ID,
+      GOOGLE_CLIENT_SECRET,
+    } = context.cloudflare.env;
     this.sessionStorage = createCookieSessionStorage({
       cookie: {
         name: "linkin:auth",
@@ -21,8 +26,8 @@ export class Auth {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,
         httpOnly: true,
-        secure: env.NODE_ENV === "production",
-        secrets: [env.COOKIE_SESSION_SECRET!],
+        secure: ENVIROMENT === "PROD",
+        secrets: [COOKIE_SESSION_SECRET!],
       },
     });
 
@@ -36,9 +41,12 @@ export class Auth {
     this.authenticator.use(
       new GoogleStrategy(
         {
-          clientID: env.GOOGLE_CLIENT_ID!,
-          clientSecret: env.GOOGLE_CLIENT_SECRET!,
-          callbackURL: "http://localhost:5173/auth/google/callback",
+          clientID: GOOGLE_CLIENT_ID!,
+          clientSecret: GOOGLE_CLIENT_SECRET!,
+          callbackURL:
+            ENVIROMENT === "PROD"
+              ? "https://linkin-remix.pages.dev/auth/google/callback"
+              : "http://localhost:5173/auth/google/callback",
         },
         async ({ profile }) => {
           const { DB } = context.cloudflare.env;

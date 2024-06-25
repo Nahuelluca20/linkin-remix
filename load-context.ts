@@ -9,6 +9,10 @@ import { type PlatformProxy } from "wrangler";
 interface Env {
   DB: D1Database;
   KV: KVNamespace;
+  ENVIROMENT: string;
+  COOKIE_SESSION_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
 }
 
 type Cloudflare = Omit<PlatformProxy<Env>, "dispose">;

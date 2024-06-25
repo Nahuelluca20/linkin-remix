@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { env } from "node:process";
 import {
   createTypedSessionStorage,
   TypedSessionStorage,
@@ -31,7 +30,8 @@ export class SessionStorage {
   public destroy: TypedSessionStorage<typeof SessionSchema>["destroySession"];
 
   constructor(context: AppLoadContext) {
-    const { KV } = context.cloudflare.env;
+    const { KV, COOKIE_SESSION_SECRET, ENVIROMENT } = context.cloudflare.env;
+
     this.sessionStorage = createTypedSessionStorage({
       sessionStorage: createWorkersKVSessionStorage({
         kv: KV,
@@ -41,8 +41,8 @@ export class SessionStorage {
           maxAge: 60 * 60 * 24 * 365,
           httpOnly: true,
           sameSite: "lax",
-          secure: env.NODE_ENV === "production",
-          secrets: [env.COOKIE_SESSION_SECRET!],
+          secure: ENVIROMENT === "PROD",
+          secrets: [COOKIE_SESSION_SECRET],
         },
       }),
       schema: SessionSchema,
