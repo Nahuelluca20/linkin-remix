@@ -1,8 +1,9 @@
 import { createCookieSessionStorage } from "@remix-run/cloudflare";
 import { createThemeSessionResolver } from "remix-themes";
+import { env } from "node:process";
 
 // You can default to 'development' if process.env.NODE_ENV is not set
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === "production";
 
 const sessionStorage = createCookieSessionStorage({
   cookie: {

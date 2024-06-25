@@ -14,7 +14,6 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 
 export default function Route() {
   const { user } = useLoaderData<typeof loader>();
-  console.log(user);
   return (
     <section>
       <h1 className="text-2xl font-bold">Edit Profile</h1>

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { env } from "node:process";
 import {
   createTypedSessionStorage,
   TypedSessionStorage,
@@ -40,8 +41,8 @@ export class SessionStorage {
           maxAge: 60 * 60 * 24 * 365,
           httpOnly: true,
           sameSite: "lax",
-          secure: process.env.NODE_ENV === "production",
-          secrets: [process.env.COOKIE_SESSION_SECRET!],
+          secure: env.NODE_ENV === "production",
+          secrets: [env.COOKIE_SESSION_SECRET!],
         },
       }),
       schema: SessionSchema,

@@ -3,7 +3,7 @@ import type { AppLoadContext, SessionStorage } from "@remix-run/cloudflare";
 import { createCookieSessionStorage } from "@remix-run/cloudflare";
 import { Authenticator } from "remix-auth";
 import { GoogleStrategy } from "remix-auth-google";
-
+import { env } from "node:process";
 import { db } from "db";
 import { User } from "./session.server";
 
@@ -21,8 +21,8 @@ export class Auth {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        secrets: [process.env.COOKIE_SESSION_SECRET!],
+        secure: env.NODE_ENV === "production",
+        secrets: [env.COOKIE_SESSION_SECRET!],
       },
     });
 
@@ -36,12 +36,11 @@ export class Auth {
     this.authenticator.use(
       new GoogleStrategy(
         {
-          clientID: process.env.GOOGLE_CLIENT_ID!,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          clientID: env.GOOGLE_CLIENT_ID!,
+          clientSecret: env.GOOGLE_CLIENT_SECRET!,
           callbackURL: "http://localhost:5173/auth/google/callback",
         },
         async ({ profile }) => {
-          console.log(profile);
           const { DB } = context.cloudflare.env;
           const findUser = await db(DB)
             .selectFrom("users")
