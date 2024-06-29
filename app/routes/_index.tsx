@@ -28,7 +28,7 @@ export default function Index() {
         <li>
           <Link
             className="text-blue-700 underline visited:text-purple-900"
-            to="/dashboard"
+            to="/edit-profile"
             rel="noreferrer"
           >
             Edit Profile

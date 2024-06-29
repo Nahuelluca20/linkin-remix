@@ -8,7 +8,7 @@ import { type PlatformProxy } from "wrangler";
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface Env {
   DB: D1Database;
-  KV: KVNamespace;
+  auth_kv: KVNamespace;
   ENVIROMENT: string;
   COOKIE_SESSION_SECRET: string;
   GOOGLE_CLIENT_ID: string;

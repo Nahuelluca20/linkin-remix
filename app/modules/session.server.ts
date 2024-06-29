@@ -16,10 +16,16 @@ export const UserSchema = z.object({
   profile_image: z.string().url().optional(),
 });
 
+export const ThemeSchema = z.object({
+  theme: z.string(),
+});
+
 export type User = z.infer<typeof UserSchema>;
+export type Theme = z.infer<typeof ThemeSchema>;
 
 export const SessionSchema = z.object({
   user: UserSchema.optional(),
+  theme: ThemeSchema.optional(),
 });
 
 export class SessionStorage {
@@ -28,13 +34,15 @@ export class SessionStorage {
   public read: TypedSessionStorage<typeof SessionSchema>["getSession"];
   public commit: TypedSessionStorage<typeof SessionSchema>["commitSession"];
   public destroy: TypedSessionStorage<typeof SessionSchema>["destroySession"];
+  // public themeSession: Theme;
 
   constructor(context: AppLoadContext) {
-    const { KV, COOKIE_SESSION_SECRET, ENVIROMENT } = context.cloudflare.env;
+    const { auth_kv, COOKIE_SESSION_SECRET, ENVIROMENT } =
+      context.cloudflare.env;
 
     this.sessionStorage = createTypedSessionStorage({
       sessionStorage: createWorkersKVSessionStorage({
-        kv: KV,
+        kv: auth_kv,
         cookie: {
           name: "linkin:session",
           path: "/",
