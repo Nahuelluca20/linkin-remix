@@ -34,7 +34,6 @@ export class SessionStorage {
   public read: TypedSessionStorage<typeof SessionSchema>["getSession"];
   public commit: TypedSessionStorage<typeof SessionSchema>["commitSession"];
   public destroy: TypedSessionStorage<typeof SessionSchema>["destroySession"];
-  // public themeSession: Theme;
 
   constructor(context: AppLoadContext) {
     const { auth_kv, COOKIE_SESSION_SECRET, ENVIROMENT } =

@@ -1,16 +1,60 @@
-import { json, LoaderFunctionArgs, redirect } from "@remix-run/cloudflare";
+import {
+  ActionFunctionArgs,
+  json,
+  LoaderFunctionArgs,
+  redirect,
+} from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
+import { z } from "zod";
 import { Button } from "~/components/ui/Button";
 import { TextField } from "~/components/ui/TextField";
 import { SessionStorage } from "~/modules/session.server";
 
+// const imageSchema = z.object({
+//   file: z
+//     .instanceof(File)
+//     .refine(
+//       (file) => file.size <= 5000000,
+//       "The file must be smaller than 5 MB."
+//     )
+//     .refine(
+//       (file) => ["image/jpeg", "image/png", "image/jpg"].includes(file.type),
+//       "The file must be smaller than 5 MB."
+//     ),
+// });
+
+const formSchema = z.object({
+  name: z.string().min(5).max(320).optional(),
+  email: z.string().min(5).max(320).optional(),
+  // image: imageSchema,
+});
+
 export async function loader({ context, request }: LoaderFunctionArgs) {
+  await SessionStorage.requireUser(context, request);
   const user = await SessionStorage.readUser(context, request);
   if (!user) {
     redirect("/login");
   }
 
   return json({ user: user });
+}
+
+export async function action({ context, request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  console.log(formData.get("file"));
+  const parseData = formSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    // image: formData.get("file"),
+  });
+
+  if (parseData.success) {
+    console.log("success papá");
+  } else {
+    console.log("unseccess papito");
+  }
+
+  return null;
 }
 
 export default function Route() {
@@ -20,7 +64,7 @@ export default function Route() {
   return (
     <section>
       <h1 className="text-2xl font-bold">Edit Profile</h1>
-      <fetcher.Form className="max-w-[1200px]">
+      <fetcher.Form className="max-w-[1200px]" method="post">
         <div className="display md:flex gap-6">
           <div className="space-y-2">
             <TextField
@@ -38,24 +82,27 @@ export default function Route() {
               type="email"
             />
           </div>
-          <div
-            className={`w-[100px] h-[100px] bg-red-200 bg-[url(${user?.profile_image})]`}
-          >
-            <input
+          <div className="my-2 flex flex-col items-center">
+            <img
+              src={user?.profile_image ?? ""}
+              alt={user?.name + "profile-image"}
+              className="w-[100px] h-[100px] rounded-full"
+            />
+            {/* <input
               id="file"
               type="file"
-              height={10}
-              width={10}
-              placeholder="dass"
               accept="image/png, image/jpeg, image/jpg"
-              className={`rounded-full bg-[url(${user?.profile_image})] mt-2`}
-              // defaultValue={user?.profile_image ?? ""}
-              // src={user?.profile_image ?? ""}
-              // alt={user?.name + "profile-image"}
+              className="hidden"
             />
+            <label
+              htmlFor="file"
+              className="cursor-pointer text-sm inline-block mt-2 px-2 py-2 bg-blue-500 text-white rounded"
+            >
+              Change Image
+            </label> */}
           </div>
         </div>
-        <Button isDisabled className={"mt-2"} type="submit">
+        <Button className="mt-2" type="submit">
           Edit
         </Button>
       </fetcher.Form>
