@@ -76,6 +76,30 @@ export class SessionStorage {
     return session.get("user");
   }
 
+  static async updateUser(
+    context: AppLoadContext,
+    request: Request,
+    updateUserData: Partial<User>
+  ) {
+    const sessionStorage = new SessionStorage(context);
+    const session = await sessionStorage.read(request.headers.get("cookie"));
+
+    const currentUser = session.get("user");
+    if (!currentUser) {
+      throw new Error("No user found in session");
+    }
+
+    const updateUser = { ...currentUser, ...updateUserData };
+    const validatedUser = UserSchema.parse(updateUser);
+    session.set("user", validatedUser);
+
+    const headers = new Headers({
+      "Set-Cookie": await sessionStorage.commit(session),
+    });
+
+    return { headers, user: validatedUser };
+  }
+
   static async requireUser(
     context: AppLoadContext,
     request: Request,
