@@ -2,7 +2,6 @@ import {
   ActionFunctionArgs,
   json,
   LoaderFunctionArgs,
-  redirect,
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "db";
@@ -19,11 +18,7 @@ const formSchema = z.object({
 });
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
-  await SessionStorage.requireUser(context, request);
-  const user = await SessionStorage.readUser(context, request);
-  if (!user) {
-    redirect("/login");
-  }
+  const user = await SessionStorage.requireUser(context, request);
 
   return json({ user: user });
 }

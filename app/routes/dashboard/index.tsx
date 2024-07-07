@@ -20,9 +20,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
 export default function Route() {
   return (
     <section>
-      <header className="flex justify-between items-start">
+      <header className="flex flex-col gap-2 md:flex-row  justify-between items-start">
         <div>
-          {" "}
           <Heading level={2} className="text-2xl font-bold">
             Dashboard
           </Heading>
