@@ -3,11 +3,7 @@ import {
   json,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import {
-  ClientActionFunctionArgs,
-  useFetcher,
-  useLoaderData,
-} from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "db";
 import { Heading } from "react-aria-components";
 import { z } from "zod";
@@ -47,51 +43,28 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
 }
 
 const instagramAccountSchema = z.object({
-  name: z.string().min(4),
-  account_tag: z.string().min(4),
+  name: z.string().min(4, { message: "Must be at least 4 characters" }),
+  account_tag: z.string().min(4, { message: "Must be at least 4 characters" }),
   account_link: z.string().url(),
 });
-
-export async function clientAction({ request }: ClientActionFunctionArgs) {
-  const formData = await request.formData();
-  const parseData = instagramAccountSchema.safeParse({
-    name: formData.get("name"),
-    account_tag: formData.get("account-tag"),
-    account_link: formData.get("account-link"),
-  });
-
-  if (parseData.success) {
-    console.log("succes");
-  } else {
-    const errors = parseData.error.issues;
-    const parseErrors = errors.map((error) => ({
-      error: error.message,
-      path: error.path[0],
-    }));
-
-    return parseErrors;
-  }
-
-  return parseData;
-}
 
 export async function action({ context, request }: ActionFunctionArgs) {
   const user = await SessionStorage.requireUser(context, request);
 
-  // if (user.id) {
-  //   const formData = await request.formData();
-  //   const parseData = instagramAccountSchema.safeParse({
-  //     name: formData.get("name"),
-  //     account_tag: formData.get("account-tag"),
-  //     account_link: formData.get("account-link"),
-  //   });
+  if (user.id) {
+    const formData = await request.formData();
+    const parseData = instagramAccountSchema.safeParse({
+      name: formData.get("name"),
+      account_tag: formData.get("account-tag"),
+      account_link: formData.get("account-link"),
+    });
 
-  //   if (parseData.success) {
-  //     console.log("success");
-  //   } else {
-  //     console.log("no success");
-  //   }
-  // }
+    if (parseData.success) {
+      console.log("success");
+    } else {
+      console.log("no success");
+    }
+  }
 
   return user;
 }
@@ -100,8 +73,6 @@ export default function Route() {
   const data = useLoaderData<typeof loader>();
   const fetcher = useFetcher();
   const accountExists = data.success;
-
-  console.log(fetcher.data);
 
   return (
     <div className="mt-10">
@@ -116,11 +87,11 @@ export default function Route() {
           type="text"
           defaultValue={accountExists ? data.response.name : ""}
           isDisabled={accountExists}
-          errorMessage={
-            fetcher.data &&
-            fetcher.data.find((err) => err.path === "name").error
-          }
-        ></TextField>
+          validate={(value) => {
+            const result = instagramAccountSchema.shape.name.safeParse(value);
+            return result.success ? null : result.error.errors[0].message;
+          }}
+        />
         <TextField
           isRequired
           label="Account Tag"
@@ -128,6 +99,11 @@ export default function Route() {
           type="text"
           defaultValue={accountExists ? data.response.account_tag : ""}
           isDisabled={accountExists}
+          validate={(value) => {
+            const result =
+              instagramAccountSchema.shape.account_tag.safeParse(value);
+            return result.success ? null : result.error.errors[0].message;
+          }}
         />
         <TextField
           isRequired
@@ -136,6 +112,11 @@ export default function Route() {
           type="url"
           defaultValue={accountExists ? data.response.account_link : ""}
           isDisabled={accountExists}
+          validate={(value) => {
+            const result =
+              instagramAccountSchema.shape.account_link.safeParse(value);
+            return result.success ? null : result.error.errors[0].message;
+          }}
         />
         {!accountExists && <Button type="submit">Add Account</Button>}
       </fetcher.Form>
