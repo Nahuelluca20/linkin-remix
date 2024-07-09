@@ -23,7 +23,10 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
       .executeTakeFirst();
 
     if (instagramAccount) {
-      return json<LoaderData>({ success: true, response: instagramAccount });
+      return json<LoaderData>(
+        { success: true, response: instagramAccount },
+        { status: 200 }
+      );
     }
   }
 
@@ -64,7 +67,7 @@ export async function action({ context, request }: ActionFunctionArgs) {
           );
         }
 
-        return json<ActionData>({ success: true, user });
+        return json<ActionData>({ success: true, user }, { status: 201 });
       } catch (dbError) {
         console.error("Database error:", dbError);
         return json<ActionData>(

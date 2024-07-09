@@ -1,4 +1,4 @@
-export interface IntagramAccountTable {
+export interface InstagramAccountTable {
   id?: number;
   name: string;
   account_tag: string;

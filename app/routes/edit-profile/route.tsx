@@ -20,7 +20,7 @@ const formSchema = z.object({
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const user = await SessionStorage.requireUser(context, request);
 
-  return json({ user: user });
+  return json({ user: user }, { status: 200 });
 }
 
 export async function action({ context, request }: ActionFunctionArgs) {
