@@ -5,22 +5,12 @@ import {
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "db";
-import { IUser } from "db/tables-interfaces/user";
 import { Heading } from "react-aria-components";
-import { z } from "zod";
 import { Button } from "~/components/ui/Button";
 import { TextField } from "~/components/ui/TextField";
 import { SessionStorage } from "~/modules/session.server";
-
-interface InstagramAccount {
-  name: string;
-  account_tag: string;
-  account_link: string;
-}
-
-type LoaderData =
-  | { success: true; response: InstagramAccount }
-  | { success: false; response: string };
+import { ActionData, LoaderData } from "./types";
+import { instagramAccountSchema } from "./schemas";
 
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const user = await SessionStorage.requireUser(context, request);
@@ -42,25 +32,6 @@ export async function loader({ context, request }: LoaderFunctionArgs) {
     { status: 400 }
   );
 }
-
-const instagramAccountSchema = z.object({
-  name: z.string().min(4, { message: "Must be at least 4 characters" }),
-  account_tag: z.string().min(4, { message: "Must be at least 4 characters" }),
-  account_link: z.string().url(),
-  user_id: z.number(),
-});
-
-type ActionDataSuccess = {
-  success: true;
-  user: IUser;
-};
-
-type ActionDataError = {
-  success: false;
-  error: string | Record<string, unknown>;
-};
-
-export type ActionData = ActionDataSuccess | ActionDataError;
 
 export async function action({ context, request }: ActionFunctionArgs) {
   const user = await SessionStorage.requireUser(context, request);
