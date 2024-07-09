@@ -1,4 +1,4 @@
-export interface IntagramAccount {
+export interface IntagramAccountTable {
   id?: number;
   name: string;
   account_tag: string;

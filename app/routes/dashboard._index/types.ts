@@ -1,4 +1,4 @@
-import { IUser } from "db/tables-interfaces/user";
+import { UserTable } from "db/tables-interfaces/user-table";
 
 export interface InstagramAccount {
   name: string;
@@ -12,7 +12,7 @@ export type LoaderData =
 
 type ActionDataSuccess = {
   success: true;
-  user: IUser;
+  user: UserTable;
 };
 
 type ActionDataError = {
