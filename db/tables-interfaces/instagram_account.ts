@@ -1,5 +1,5 @@
 export interface IntagramAccount {
-  id: number;
+  id?: number;
   name: string;
   account_tag: string;
   account_link: string;

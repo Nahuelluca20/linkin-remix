@@ -5,6 +5,7 @@ import {
 } from "@remix-run/cloudflare";
 import { useFetcher, useLoaderData } from "@remix-run/react";
 import { db } from "db";
+import { IUser } from "db/tables-interfaces/user";
 import { Heading } from "react-aria-components";
 import { z } from "zod";
 import { Button } from "~/components/ui/Button";
@@ -46,7 +47,20 @@ const instagramAccountSchema = z.object({
   name: z.string().min(4, { message: "Must be at least 4 characters" }),
   account_tag: z.string().min(4, { message: "Must be at least 4 characters" }),
   account_link: z.string().url(),
+  user_id: z.number(),
 });
+
+type ActionDataSuccess = {
+  success: true;
+  user: IUser;
+};
+
+type ActionDataError = {
+  success: false;
+  error: string | Record<string, unknown>;
+};
+
+export type ActionData = ActionDataSuccess | ActionDataError;
 
 export async function action({ context, request }: ActionFunctionArgs) {
   const user = await SessionStorage.requireUser(context, request);
@@ -57,21 +71,49 @@ export async function action({ context, request }: ActionFunctionArgs) {
       name: formData.get("name"),
       account_tag: formData.get("account-tag"),
       account_link: formData.get("account-link"),
+      user_id: Number(user.id),
     });
 
     if (parseData.success) {
-      console.log("success");
+      try {
+        const addAccount = await db(context.cloudflare.env.DB)
+          .insertInto("instagram_account")
+          .values({
+            name: parseData.data.name,
+            account_tag: parseData.data.account_tag,
+            account_link: parseData.data.account_link,
+            user_id: parseData.data.user_id,
+          })
+          .executeTakeFirst();
+
+        if (!addAccount) {
+          return json<ActionData>(
+            { success: false, error: "Failed to add account" },
+            { status: 400 }
+          );
+        }
+
+        return json<ActionData>({ success: true, user });
+      } catch (dbError) {
+        console.error("Database error:", dbError);
+        return json<ActionData>(
+          { success: false, error: "There was an error try again later" },
+          { status: 500 }
+        );
+      }
     } else {
-      console.log("no success");
+      return json<ActionData>(
+        { success: false, error: parseData.error.format() },
+        { status: 400 }
+      );
     }
   }
-
-  return user;
 }
 
 export default function Route() {
   const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
+
+  const fetcher = useFetcher<typeof action>();
   const accountExists = data.success;
 
   return (
@@ -118,6 +160,9 @@ export default function Route() {
             return result.success ? null : result.error.errors[0].message;
           }}
         />
+        {fetcher?.data?.success === false && (
+          <p className="text-red-500">{String(fetcher?.data.error)}</p>
+        )}
         {!accountExists && <Button type="submit">Add Account</Button>}
       </fetcher.Form>
     </div>
