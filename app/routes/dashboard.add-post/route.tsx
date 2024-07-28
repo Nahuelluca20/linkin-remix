@@ -48,13 +48,13 @@ export async function action({ context, request }: ActionFunctionArgs) {
         { status: 400 }
       );
     }
+
     const parseData = instagramPostSchema.safeParse({
       image_url: imageUrl,
       external_link: formData.get("external-url"),
       post_name: formData.get("post-name"),
       account_id: Number(formData.get("account-id")),
     });
-
     if (parseData.success) {
       try {
         const post = await AddPost(context, { ...parseData.data });
